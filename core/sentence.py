@@ -42,18 +42,19 @@ class Symbol(Expression):
     def __str__(self):
         return str(self.operand)
 
+    def __repr__(self):
+        return str(self.operand)
 
-true_symbol = Symbol(True)
-false_symbol = Symbol(False)
+    def __hash__(self):
+        return hash(self.operand)
+
+
+true = Symbol(True)
+false = Symbol(False)
 
 
 class Unary(Expression):
     def __init__(self, op, operand):
-        if operand == True:
-            operand = true_symbol
-        elif operand == False:
-            operand = false_symbol
-
         self.op = op
         self.operand = operand
 
@@ -61,6 +62,12 @@ class Unary(Expression):
 
     def __str__(self):
         return ' '.join([self.op, str(self.operand)])
+
+    def __repr__(self):
+        return ' '.join([self.op, str(self.operand)])
+
+    def __hash__(self):
+        return hash(' '.join([self.op, str(self.operand)]))
 
 
 class Negate(Unary):
@@ -70,47 +77,37 @@ class Negate(Unary):
     # Operator overloads
 
     def __invert__(self):
-        return Negate('~', self)
+        return Negate(self)
 
     def __and__(self, rhs):
         return And(self, rhs)
 
     def __or__(self, rhs):
-        return Or('|', self, rhs)
+        return Or(self, rhs)
 
     def __rshift__(self, rhs):
-        return Implies('>>', self, rhs)
+        return Implies(self, rhs)
 
     def __mod__(self, rhs):
-        return Iff('==', self, rhs)
+        return Iff(self, rhs)
 
     # Reverse operator overloads
 
     def __rand__(self, lhs):
-        return And('&', lhs, self)
+        return And(lhs, self)
 
     def __ror__(self, lhs):
-        return Or('|', lhs, self)
+        return Or(lhs, self)
 
     def __rrshift__(self, lhs):
-        return Implies('>>', lhs, self)
+        return Implies(lhs, self)
 
     def __mod__(self, rhs):
-        return Iff('==', self, rhs)
+        return Iff(self, rhs)
 
 
 class Binary(Expression):
     def __init__(self, op, left, right):
-        if left == True:
-            left = true_symbol
-        elif left == False:
-            left = false_symbol
-
-        if right == True:
-            right = true_symbol
-        elif right == False:
-            right = false_symbol
-
         self.op = op
         self.left = left
         self.right = right
@@ -119,6 +116,12 @@ class Binary(Expression):
 
     def __str__(self):
         return ' '.join([str(self.left), self.op, str(self.right)])
+
+    def __repr__(self):
+        return ' '.join([str(self.left), self.op, str(self.right)])
+
+    def __hash__(self):
+        return hash(' '.join([str(self.left), self.op, str(self.right)]))
 
 
 class And(Binary):
@@ -195,7 +198,7 @@ class Or(Binary):
 
 class Implies(Binary):
     def __init__(self, left, right):
-        super().__init__('>>', left, right)
+        super().__init__('=>', left, right)
 
     # Operator overloads
 
@@ -231,7 +234,7 @@ class Implies(Binary):
 
 class Iff(Binary):
     def __init__(self, left, right):
-        super().__init__('==', left, right)
+        super().__init__('<=>', left, right)
 
     # Operator overloads
 
@@ -270,3 +273,27 @@ class Iff(Binary):
 
 def make_symbols(symbols):
     return [Symbol(symbol) for symbol in symbols.split()]
+
+
+def expr(op, *args):
+    if op == '~':
+        return Negate(*args)
+    elif op == '&':
+        return And(*args)
+    elif op == '|':
+        return Or(*args)
+    elif op == '>>':
+        return Implies(*args)
+    elif op == '%':
+        return Iff(*args)
+
+    return None
+
+
+def arguments(expr):
+    if isinstance(expr, Unary):
+        return [expr.operand]
+    elif isinstance(expr, Binary):
+        return [expr.left, expr.right]
+
+    return []

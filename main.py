@@ -1,14 +1,18 @@
-from core.sentence import Symbol
-from core import make_symbols
+from core.tt_entails import tt_entails
+from core import KnowledgeBase, make_symbols, to_cnf, true, false
 
 
 def main():
-    # add sentences
+    (A, B, C, D, E) = make_symbols('A B C D E')
 
-    x, y = make_symbols('x y')
+    kb = KnowledgeBase()
 
-    s = x & y | True
-    print(s)
+    kb.tell(~(B | C))
+    kb.tell((A & B) | C)
+    kb.tell(A & (B | (D & E)))
+
+    x = kb.get_all_clauses()
+    print(x)
 
 
 if __name__ == '__main__':
