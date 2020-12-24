@@ -1,18 +1,21 @@
-from core.tt_entails import tt_entails
-from core import KnowledgeBase, make_symbols, to_cnf, true, false
+from core.cnf import to_cnf
+from core import KnowledgeBase, make_symbols, true, false
 
 
 def main():
-    (A, B, C, D, E) = make_symbols('A B C D E')
+    P11, P12, P21, P22, P31, B11, B21 = make_symbols(
+        'P11 P12 P21 P22 P31 B11 B21')
 
     kb = KnowledgeBase()
 
-    kb.tell(~(B | C))
-    kb.tell((A & B) | C)
-    kb.tell(A & (B | (D & E)))
+    kb.tell(~P11)
+    kb.tell(B11 % (P12 | P21))
+    kb.tell(B21 % (P11 | P22 | P31))
+    kb.tell(~B11)
+    kb.tell(B21)
 
-    x = kb.get_all_clauses()
-    print(x)
+    result = kb.ask_if_true(P22)
+    print(result)
 
 
 if __name__ == '__main__':

@@ -48,6 +48,9 @@ class Symbol(Expression):
     def __hash__(self):
         return hash(self.operand)
 
+    def __eq__(self, other):
+        return isinstance(other, Symbol) and self.operand == other.operand
+
 
 true = Symbol(True)
 false = Symbol(False)
@@ -68,6 +71,9 @@ class Unary(Expression):
 
     def __hash__(self):
         return hash(' '.join([self.op, str(self.operand)]))
+
+    def __eq__(self, other):
+        return isinstance(other, Unary) and self.operand == other.operand and self.op == other.op
 
 
 class Negate(Unary):
@@ -122,6 +128,9 @@ class Binary(Expression):
 
     def __hash__(self):
         return hash(' '.join([str(self.left), self.op, str(self.right)]))
+
+    def __eq__(self, other):
+        return isinstance(other, Binary) and self.left == other.left and self.right == other.right and self.op == other.op
 
 
 class And(Binary):
@@ -282,9 +291,9 @@ def expr(op, *args):
         return And(*args)
     elif op == '|':
         return Or(*args)
-    elif op == '>>':
+    elif op == '=>':
         return Implies(*args)
-    elif op == '%':
+    elif op == '<=>':
         return Iff(*args)
 
     return None

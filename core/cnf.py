@@ -9,7 +9,7 @@ def to_cnf(s):
 
 
 def eliminate_implications(s):
-    if not isinstance(s, Iff) or not isinstance(s, Implies):
+    if not isinstance(s, Iff) and not isinstance(s, Implies):
         return s
 
     left = eliminate_implications(s.left)

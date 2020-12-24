@@ -1,4 +1,5 @@
-from core.sentence import And, Binary, Iff, Implies, Negate, Or, Symbol, Unary, arguments
+from .cnf import associate, conjuncts, disjuncts, to_cnf
+from .sentence import And, Binary, Iff, Implies, Negate, Or, Symbol, Unary, arguments
 
 
 def prop_symbols(x):
@@ -84,6 +85,8 @@ def pl_true(exp, model):
 def extend(s, var, val):
     return {**s, var: val}
 
+# TT Entails
+
 
 def tt_check_all(kb, alpha, symbols, model):
     if not symbols:
@@ -106,3 +109,78 @@ def tt_entails(kb, alpha):
     """
     symbols = list(prop_symbols(kb & alpha))
     return tt_check_all(kb, alpha, symbols, {})
+
+
+#  PL Resolution
+
+def append_unique(clauses, new):
+    for c in new:
+        if c not in clauses:
+            clauses.append(c)
+
+
+def unique(seq):
+    return list(set(seq))
+
+
+def remove_all(item, seq):
+    if isinstance(seq, str):
+        return seq.replace(item, '')
+    elif isinstance(seq, set):
+        rest = seq.copy()
+        rest.remove(item)
+        return rest
+    else:
+        return [x for x in seq if x != item]
+
+
+def pl_resolve(ci, cj):
+    clauses = []
+
+    ci_disjuncts = disjuncts(ci)
+    cj_disjuncts = disjuncts(cj)
+
+    for di in ci_disjuncts:
+        di = to_cnf(di)
+
+        for dj in cj_disjuncts:
+            dj = to_cnf(dj)
+
+            if di == ~dj or ~di == dj:
+                x = unique(remove_all(di, ci_disjuncts) +
+                           remove_all(dj, cj_disjuncts))
+                y = associate('|', x)
+                clauses.append(y)
+
+    return clauses
+
+
+def pl_resolution(clauses, alpha):
+    """
+    >>> pl_resolution(horn_clauses_KB, A)
+    True
+    """
+    clauses = list(clauses) + conjuncts(to_cnf(~alpha))
+    new = set()
+
+    while True:
+        n = len(clauses)
+        pairs = [(clauses[i], clauses[j])
+                 for i in range(n)
+                 for j in range(i + 1, n)]
+
+        for (ci, cj) in pairs:
+            resolvents = pl_resolve(ci, cj)
+
+            if len(resolvents) > 0:
+                resolvents = resolvents
+
+            if False in resolvents:
+                return True
+
+            new.update(resolvents)
+
+        if new.issubset(set(clauses)):
+            return False
+
+        append_unique(clauses, new)
