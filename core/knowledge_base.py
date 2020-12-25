@@ -1,5 +1,5 @@
 from .cnf import associate, conjuncts, to_cnf
-from .prop_logic import pl_resolution, tt_entails
+from .prop_logic_entail import pl_resolution, tt_entails
 
 
 class KnowledgeBase:

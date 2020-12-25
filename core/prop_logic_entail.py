@@ -1,5 +1,6 @@
 from .cnf import associate, conjuncts, disjuncts, to_cnf
 from .sentence import And, Binary, Iff, Implies, Negate, Or, Symbol, Unary, arguments
+from .utils import extend, unique, remove_all, append_unique
 
 
 def prop_symbols(x):
@@ -82,9 +83,6 @@ def pl_true(exp, model):
             raise ValueError('Illegal operator in logic expression' + str(exp))
 
 
-def extend(s, var, val):
-    return {**s, var: val}
-
 # TT Entails
 
 
@@ -112,27 +110,6 @@ def tt_entails(kb, alpha):
 
 
 #  PL Resolution
-
-def append_unique(clauses, new):
-    for c in new:
-        if c not in clauses:
-            clauses.append(c)
-
-
-def unique(seq):
-    return list(set(seq))
-
-
-def remove_all(item, seq):
-    if isinstance(seq, str):
-        return seq.replace(item, '')
-    elif isinstance(seq, set):
-        rest = seq.copy()
-        rest.remove(item)
-        return rest
-    else:
-        return [x for x in seq if x != item]
-
 
 def pl_resolve(ci, cj):
     clauses = []
@@ -171,9 +148,6 @@ def pl_resolution(clauses, alpha):
 
         for (ci, cj) in pairs:
             resolvents = pl_resolve(ci, cj)
-
-            if len(resolvents) > 0:
-                resolvents = resolvents
 
             if False in resolvents:
                 return True

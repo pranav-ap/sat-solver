@@ -1,4 +1,5 @@
 from .sentence import Iff, Implies, Negate, Symbol,  Unary, Binary, And, Or, arguments, expr
+from .utils import first
 
 
 def to_cnf(s):
@@ -52,11 +53,6 @@ def move_not_inwards(s):
                 return associate('&', [left, right])
 
         return s
-
-
-def first(iterable, default=None):
-    """Return the first element of an iterable; or default."""
-    return next(iter(iterable), default)
 
 
 def distribute_and_over_or(s):
@@ -113,11 +109,6 @@ def associate(op, args):
             return False
 
         return None
-
-    elif len(args) == 1:
-        return args[0]
-    elif len(args) == 2:
-        return expr(op, *args)
 
     return combine(op, args)
 
