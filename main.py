@@ -1,20 +1,27 @@
+from core.knowledge_base import PropDefiniteKB
 from core.cnf import to_cnf
 from core import KnowledgeBase, make_symbols, true, false
 
 
 def main():
-    P11, P12, P21, P22, P31, B11, B21 = make_symbols(
-        'P11 P12 P21 P22 P31 B11 B21')
+    (A, B, C, D, E, F, G, H, I, J) = make_symbols('A B C D E F G H I J')
 
-    kb = KnowledgeBase()
+    clauses = [(B & F) >> E,
+               (A & E & F) >> G,
+               (B & C) >> F,
+               (A & B) >> D,
+               (E & F) >> H,
+               (H & I) >> J,
+               A,
+               B,
+               C]
 
-    kb.tell(~P11)
-    kb.tell(B11 % (P12 | P21))
-    kb.tell(B21 % (P11 | P22 | P31))
-    kb.tell(~B11)
-    kb.tell(B21)
+    kb = PropDefiniteKB()
 
-    result = kb.ask_if_true(P22)
+    for clause in clauses:
+        kb.tell(clause)
+
+    result = kb.ask_if_true(G)
     print(result)
 
 

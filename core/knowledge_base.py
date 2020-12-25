@@ -1,5 +1,6 @@
+from core.sentence import Implies
 from .cnf import associate, conjuncts, to_cnf
-from .prop_logic_entail import pl_resolution, tt_entails
+from .prop_logic_entail import is_definite_clause, pl_forward_chaining_entails, pl_resolution, tt_entails
 
 
 class KnowledgeBase:
@@ -27,3 +28,18 @@ class KnowledgeBase:
 
     def size(self):
         return len(self.clauses)
+
+
+class PropDefiniteKB:
+    def __init__(self):
+        self.clauses = set()
+
+    def tell(self, clause):
+        assert is_definite_clause(clause), "Must be definite clause"
+        self.clauses.add(clause)
+
+    def ask_if_true(self, query):
+        return pl_forward_chaining_entails(self, query)
+
+    def clauses_with_premise(self, p):
+        return [c for c in self.clauses if isinstance(c, Implies) and p in conjuncts(c.left)]

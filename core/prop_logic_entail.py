@@ -1,6 +1,7 @@
 from .cnf import associate, conjuncts, disjuncts, to_cnf
 from .sentence import And, Binary, Iff, Implies, Negate, Or, Symbol, Unary, arguments
 from .utils import extend, unique, remove_all, append_unique
+from collections import defaultdict
 
 
 def prop_symbols(x):
@@ -158,3 +159,59 @@ def pl_resolution(clauses, alpha):
             return False
 
         append_unique(clauses, new)
+
+
+# chaining
+
+
+def is_definite_clause(s):
+    """
+    A definite clause looks like this:
+    A & B & ... & C ==> D
+    """
+    if isinstance(s, Symbol):
+        return True
+    elif isinstance(s, Implies):
+        antecedent, consequent = s.left, s.right
+        return isinstance(consequent, Symbol) and all(isinstance(arg, Symbol) for arg in conjuncts(antecedent))
+
+    return False
+
+
+def parse_definite_clause(s):
+    assert is_definite_clause(s)
+
+    if isinstance(s, Symbol):
+        return [], s
+
+    antecedent, consequent = s.left, s.right
+    return conjuncts(antecedent), consequent
+
+
+def pl_forward_chaining_entails(kb, query):
+    """
+    >>> pl_fc_entails(horn_clauses_KB, expr('Q'))
+    True
+    """
+    count = {c: len(conjuncts(c.left))
+             for c in list(kb.clauses) if isinstance(c, Implies)}
+
+    inferred = defaultdict(bool)
+    agenda = [s for s in list(kb.clauses) if isinstance(s, Symbol)]
+
+    while agenda:
+        premise_symbol = agenda.pop()
+
+        if premise_symbol == query:
+            return True
+
+        if not inferred[premise_symbol]:
+            inferred[premise_symbol] = True
+
+            for clause in kb.clauses_with_premise(premise_symbol):
+                count[clause] -= 1
+
+                if count[clause] == 0:
+                    agenda.append(clause.right)
+
+    return False
