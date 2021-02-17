@@ -189,10 +189,6 @@ def parse_definite_clause(s):
 
 
 def pl_forward_chaining_entails(kb, query):
-    """
-    >>> pl_fc_entails(horn_clauses_KB, expr('Q'))
-    True
-    """
     count = {c: len(conjuncts(c.left))
              for c in list(kb.clauses) if isinstance(c, Implies)}
 
@@ -215,3 +211,6 @@ def pl_forward_chaining_entails(kb, query):
                     agenda.append(clause.right)
 
     return False
+
+
+# DPLL

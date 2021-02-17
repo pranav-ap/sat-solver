@@ -1,3 +1,4 @@
+from core.knowledge_base import PropDefiniteKB
 from core import *
 import pytest
 
@@ -36,4 +37,26 @@ def test_wumpus_world():
     kb.tell(B21)
 
     result = kb.ask_if_true(P22)
+    assert result
+
+
+def test_pl_forward_chaining():
+    (A, B, C, D, E, F, G, H, I, J) = make_symbols('A B C D E F G H I J')
+
+    clauses = [(B & F) >> E,
+               (A & E & F) >> G,
+               (B & C) >> F,
+               (A & B) >> D,
+               (E & F) >> H,
+               (H & I) >> J,
+               A,
+               B,
+               C]
+
+    kb = PropDefiniteKB()
+
+    for clause in clauses:
+        kb.tell(clause)
+
+    result = kb.ask_if_true(G)
     assert result
